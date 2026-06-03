@@ -1,21 +1,7 @@
 jmp main
 
-FlagColuna: var #40 ;inicializa no zero == flag desligada
-FlagCaindo: var #10
 posMenina: var #1
 posAntMenina: var #1
-
-IncRandGato: var #10
-    static IncRandGato + #0, #0 ;inicializa no 0
-    static IncRandGato + #1, #0 ;inicializa no 0
-    static IncRandGato + #2, #0 ;inicializa no 0
-    static IncRandGato + #3, #0 ;inicializa no 0
-    static IncRandGato + #4, #0 ;inicializa no 0
-    static IncRandGato + #5, #0 ;inicializa no 0
-    static IncRandGato + #6, #0 ;inicializa no 0
-    static IncRandGato + #7, #0 ;inicializa no 0
-    static IncRandGato + #8, #0 ;inicializa no 0
-    static IncRandGato + #9, #0 ;inicializa no 0
     
     
 main:
@@ -26,22 +12,15 @@ main:
 	Loopmenu:
 		inchar r4
 		loadn r1, #13           ;tecla enter
-		
-		inc r2                  ;faz a soma aleatória para dar o rand
 
 		cmp r4, r1
 		jne Loopmenu
 
 		loadn r5, #40           ;limita o valor para ficar entre 0 e 39
 		mod r3, r2, r5
-
-		loadn r0, #IncRandGato
-		storei r0, r3           ;guardo esse valor aleatório no IncRandGato[0]
 		
 		
 	Restart:
-        call Inicializacao
-
         call ApagaTela
         loadn R1, #tela2Linha0	    ;Endereco onde comeca a primeira linha do cenario!!
         loadn R2, #512  			;cor verde -> grama
@@ -61,50 +40,7 @@ main:
 halt
 
 ;--------------------------------------------
-;               Inicialização
-;--------------------------------------------
-Inicializacao:
-    ;Zera as flags
-    push r0
-    push r1
-    push r2
-    push r3
-
-    loadn r0, #FlagCaindo       ;sempre é endereço, não flag
-    loadn r2, #10               ;número de flags (como são de 0 - 4, se o r3 == 5, passou do número de flags existentes)
-    loadn r1, #0                ;vai ser o 0 que zera as flags
-    store posAntMenina, r1
-    loadn r3, #0                ;contador para não passar o número de flags -> qual flag que é
-    LoopFlagCaindo0:
-        storei r0, r1           ;endereço da flag recebe 0
-
-        inc r0      ;vai para o próximo endereço da flag
-        inc r3      ;vai para a próxima flag 
-
-        cmp r3, r2
-        jne LoopFlagCaindo0
-        
-    loadn r3, #0                ;contador para não passar o número de flags -> qual flag que é
-    loadn r0, #FlagColuna
-    loadn r2, #40               ;número de flags (como são de 0 - 5, se o r3 == 6, passou do número de flags existentes)
-    LoopFlagColuna0:
-        storei r0, r1           ;endereço da flag recebe 0
-
-        inc r0      ;vai para o próximo endereço da flag
-        inc r3      ;vai para a próxima flag 
-
-        cmp r3, r2
-        jne LoopFlagColuna0
-
-    pop r3
-    pop r2
-    pop r1
-    pop r0
-    rts
-    
-
-;--------------------------------------------
-;            Desenha e Apaga Simoes 
+;            Desenha e Apaga Menina
 ;--------------------------------------------
 DesenhaMenina:
     push r0
