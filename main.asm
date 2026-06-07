@@ -35,7 +35,7 @@ main:
         call ImprimeTela2   		;Rotina de Impresao de Cenario na Tela Inteira
         
         loadn R1, #tela3Linha0	    ;Endereco onde comeca a primeira linha do cenario!!
-        loadn R2, #256              ;cor marrom         
+        loadn R2, #30464              ;cor marrom         
         call ImprimeTela2   	    ;Rotina de Impresao de Cenario na Tela Inteira
         
         loadn r0, #874
@@ -429,7 +429,7 @@ tela2Linha17 : string "                                        "
 tela2Linha18 : string "                                        "
 tela2Linha19 : string "                                        "
 tela2Linha20 : string "                                        "
-tela2Linha21 : string "___________,M_______M__,______________,M"
+tela2Linha21 : string "_____M_____,M_______M__,______________,M"
 tela2Linha22 : string "                                        "
 tela2Linha23 : string "                                        "
 tela2Linha24 : string "                                        "
@@ -462,7 +462,7 @@ tela3Linha17 : string "     |                                  "
 tela3Linha18 : string "     |                                  "
 tela3Linha19 : string "     |                                  "
 tela3Linha20 : string "     |                                  "
-tela3Linha21 : string " /   \\                                 "
+tela3Linha21 : string "                                        "
 tela3Linha22 : string "                                        "
 tela3Linha23 : string "                                        "
 tela3Linha24 : string "                                        "
