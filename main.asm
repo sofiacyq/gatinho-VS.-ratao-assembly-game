@@ -32,11 +32,11 @@ main:
         call ApagaTela
         loadn R1, #tela2Linha0	    ;Endereco onde comeca a primeira linha do cenario!!
         loadn R2, #58112  			;cor verde -> grama
-        call ImprimeTela2   		;Rotina de Impresao de Cenario na Tela Inteira
+        call ImprimeTela2   		;Rotina de Impressão de Cenario na Tela Inteira
         
         loadn R1, #tela3Linha0	    ;Endereco onde comeca a primeira linha do cenario!!
-        loadn R2, #30464              ;cor marrom         
-        call ImprimeTela2   	    ;Rotina de Impresao de Cenario na Tela Inteira
+        loadn R2, #30464            ;cor marrom -> tronco da árvore        
+        call ImprimeTela2   	    ;Rotina de Impressão de Cenario na Tela Inteira
         
         loadn r0, #874
         store posMenina, r0         ;Personagem começa na linha 27, coluna 39
@@ -117,9 +117,7 @@ MoveGatoId:
     add r5, r5, r6      
     outchar r5, r2
 
-    ; ==========================================================
     ; 3. Calcular a nova posição do gato
-    ; ==========================================================
     inc r2              ; Anda 1 bloco para a direita
 
     ; 4. Verificar limite da linha 21 (Fim é 880)
@@ -151,7 +149,7 @@ SalvaNovaPos:
 Delay:
     push r0
     push r1
-    loadn r0, #30      ; Ajuste aqui para controlar a velocidade dos 3 juntos
+    loadn r0, #30      ; Controle de velocidade dos 3 juntos
 Delay_Loop1:
     loadn r1, #1000
 Delay_Loop2:
