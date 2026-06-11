@@ -1,0 +1,41 @@
+# 🐱 Resgate Felino
+
+Um jogo casual de ação rápida e estratégia passiva, focado em reflexos e gerenciamento de pontuação.
+
+---
+
+## 🎯 Objetivo do Jogo
+Aparar e resgatar o maior número possível de gatinhos para acumular poder de ataque e derrotar o **Ratão** no confronto final.
+
+---
+
+## 🎮 Como Jogar
+
+### 🏃‍♀️ Fase 1: A Corrida dos Gatinhos (Ação)
+* **O que acontece:** Vários gatinhos correm pela tela em direção à menina. Eles **não** estão escondidos.
+* **Sua ação:** **Clique rapidamente** em cada gatinho antes que ele consiga fugir da tela.
+* **Importante:** Cada clique correto resgata um gatinho e aumenta o tamanho do seu exército para a próxima etapa.
+
+### 🧀 Fase 2: O Confronto com o Ratão (Estratégia Passiva)
+* **Sua ação:** **Você não faz nada!** Os controles do jogador são totalmente desativados nesta etapa.
+* **Como funciona:** O resultado da batalha depende 100% do seu desempenho na Fase 1. Os gatinhos coletados avançam e atacam o chefe sozinhos.
+* **Cálculo de Dano:** Cada gatinho salvo na retaguarda equivale a exatamente **1 ponto de dano** na vida do Ratão.
+
+---
+
+## 🏆 Condições de Fim de Jogo
+
+* **Vitória 🎉**
+  O número de gatinhos coletados é **igual ou maior** que os pontos de vida do Ratão. O chefe é derrotado instantaneamente.
+
+* **Derrota 💔**
+  Você coletou menos gatinhos do que a vida do Ratão. O poder felino não é suficiente e o vilão vence o confronto.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+* Linguagem de Programação para a lógica de jogo.
+* Interface gráfica aplicável ao ambiente de execução do projeto.
+
+---
+*Manual do Usuário desenvolvido para documentação oficial do repositório.*
