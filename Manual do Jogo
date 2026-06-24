@@ -1,0 +1,17 @@
+MANUAL DO JOGO
+
+Objetivo:
+Ajude o gatinho a encontrar a menina no final do percurso.
+
+Controles:
+• Tecla M → subir uma linha.
+• Barra de Espaço → descer uma linha.
+
+Regras:
+• O gatinho se move automaticamente para a direita.
+• Evite os obstáculos pelo caminho.
+• Ao encostar em um obstáculo, o gatinho perde uma vida e retorna ao início.
+• Ao alcançar a menina, você vence o jogo.
+• Se todas as vidas forem perdidas, o jogo termina.
+
+Boa sorte!
