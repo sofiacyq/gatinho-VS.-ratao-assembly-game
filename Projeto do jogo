@@ -1,4 +1,4 @@
-Projeto: Jogo do Gatinho e da Menina
+Projeto: Jogo Gatinho versus Ratão.
 Objetivo
 
 O objetivo do jogo é controlar um gatinho que atravessa o cenário para encontrar uma menina localizada no lado direito da tela. Durante o percurso, o jogador deve evitar obstáculos espalhados pelo caminho. Caso o gatinho colida com um obstáculo, ele perde uma vida e retorna ao ponto inicial. Quando o gatinho alcança a menina, a fase é concluída e o jogador vence.
