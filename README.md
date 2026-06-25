@@ -1,15 +1,15 @@
-#Gatinho Vs. Ratão
+# Gatinho Vs. Ratão
 
   O jogo "Gatinho Vs. Ratão" foi desenvolvido na linguagem de programação Assembly, projetado para o processador ICMC. A versão disponível foi projetada na IDE do site: https://proc.giroto.dev.
   O projeto possui vídeo explicativo disponível no link:.
   Para um bom desempenho visual, é recomendado que se utilize o charmap modificado, disponível para download no repositório.
 
-##Objetivo do jogo:
+## Objetivo do jogo:
   O objetivo do jogo é controlar um gatinho que atravessa o cenário para encontrar uma menina localizada no lado direito da tela. Durante o percurso, o jogador deve evitar obstáculos espalhados pelo caminho. Caso o gatinho colida com um obstáculo, ele perde uma vida e retorna ao ponto inicial. Quando o gatinho alcança a menina, a fase é concluída e o jogador vence.
 
-##Funcionamento Geral:
+## Funcionamento Geral:
   O jogo é executado em um simulador Assembly e utiliza uma tela de 40 colunas por 30 linhas.
-  ###Os elementos principais do jogo são:
+  ### Os elementos principais do jogo são:
     Gatinho (personagem controlado pelo jogador);
     Menina (objetivo final);
     Obstáculos (grama alta ou outros elementos);
@@ -17,7 +17,7 @@
     Sistema de movimentação;
     Tela inicial;  
     Tela de vitória ou fim de jogo.
-  ###Estrutura Inicial
+  ### Estrutura Inicial
     Quando o programa é iniciado:
     A tela inicial é exibida.
     O jogador pressiona Enter para começar.
@@ -26,17 +26,17 @@
     A menina aparece na extremidade direita.
     O laço principal do jogo começa.
     
-  Visualmente:
-  Gato --->                     Menina
-  a ___________________________ :
+  	Visualmente:
+  	Gato --->                     Menina
+  	a ___________________________ :
 
-##Sistema de Movimentação:
+## Sistema de Movimentação:
 O gatinho se move automaticamente para a direita.
 A cada ciclo do jogo: posição = posição + 1
 Isso cria a sensação de caminhada contínua.
 O jogador controla apenas a altura do personagem.
 
-###Subir
+###	Subir
   Ao pressionar uma tecla definida (por exemplo, a):
   a
   o gatinho sobe uma linha.
@@ -45,7 +45,7 @@ O jogador controla apenas a altura do personagem.
   Exemplo:
   840 → 800
 
-###Descer
+###	Descer
   Ao pressionar Espaço:
   Espaço
   o gatinho desce uma linha.
@@ -53,7 +53,7 @@ O jogador controla apenas a altura do personagem.
   Exemplo:
   800 → 840
 
-###Sistema de Obstáculos
+###	Sistema de Obstáculos
   No cenário existirão obstáculos fixos.
   Exemplo:
   _____M_____,M_______M__,__________
@@ -72,11 +72,11 @@ O jogador controla apenas a altura do personagem.
 
   Representação:
   a → M
-  ####COLISÃO
+  #### COLISÃO
   vidas = vidas - 1
   posição = início
 
-###Sistema de Vidas
+### Sistema de Vidas
   O jogador começa com:
   vidas = 3
   Cada colisão faz:
@@ -85,7 +85,7 @@ O jogador controla apenas a altura do personagem.
   vidas = 0
   o jogo termina.
 
-###Condição de Vitória
+### Condição de Vitória
   A menina permanece parada no lado direito da tela.
   Exemplo:
   posiçãoMenina = 874
@@ -101,37 +101,36 @@ O jogador controla apenas a altura do personagem.
   Representação:
   a → → → → → :
 
-##Estrutura do Código
-###O programa pode ser dividido em módulos.
-
-####Variáveis
+## Estrutura do Código
+### O programa pode ser dividido em módulos.
+#### Variáveis
   Armazenam:
   posGato
   posMenina
   vidas
   fase
   
-####Tela Inicial
+#### Tela Inicial
   Responsável por:
   Exibir o título;
   Esperar o Enter.
   call ImprimeTela
   
-####Desenho do Cenário
+#### Desenho do Cenário
   Responsável por:
   Grama;
   Árvore;
   Obstáculos.
   call ImprimeTela2
 
-####DesenhaGato
+#### DesenhaGato
   Desenha o gato na posição atual.
   
-####DesenhaMenina
+#### DesenhaMenina
   Desenha a menina.
 
 
-####Função principal do jogo.
+#### Função principal do jogo.
   Responsável por:
   Apagar o gato antigo;
   Atualizar posição;
@@ -139,7 +138,7 @@ O jogador controla apenas a altura do personagem.
   Verificar vitória;
   Desenhar novamente.
 
-###Fluxo:
+### Fluxo:
 
 Apaga
 ↓
@@ -157,7 +156,7 @@ Vitória
 cmp posição, posMenina
 jeq Venceu
 
-###Fluxograma Geral
+### Fluxograma Geral
 INÍCIO
    |
    V
@@ -207,7 +206,7 @@ Loop Principal
             |
            Fim
            
-###Conceitos de Assembly Utilizados
+### Conceitos de Assembly Utilizados
 load: Carrega um valor para um registrador.
 load r0, posGato
 
