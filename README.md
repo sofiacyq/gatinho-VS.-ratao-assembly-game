@@ -139,63 +139,62 @@ O jogador controla apenas a altura do personagem.
   Desenhar novamente.
 
 ### Fluxo:
-
-Apaga
-↓
-Move
-↓
-Verifica obstáculo
-↓
-Verifica menina
-↓
-Desenha
-Colisão
-cmp posição, obstáculo
-jeq Morreu
-Vitória
-cmp posição, posMenina
-jeq Venceu
+    Apaga
+    ↓
+    Move
+    ↓
+    Verifica obstáculo
+    ↓
+    Verifica menina
+    ↓
+    Desenha
+    Colisão
+    cmp posição, obstáculo
+    jeq Morreu
+    Vitória
+    cmp posição, posMenina
+    jeq Venceu
 
 ### Fluxograma Geral
-INÍCIO
-   |
-   V
-Tela Inicial
-   |
-Enter
-   |
-   V
-Manual
-   |
-Enter
-   |
-   V
-Desenha Cenário
-   |
-   V
-Loop Principal
-   |
-   +--> Ler Tecla
-   |
-   +--> Subir?
-   |
-   +--> Descer?
-   |
-   +--> Mover Gato
-   |
-   +--> Colidiu?
-   |        |
-   |       Sim
-   |        |
-   |    Perde Vida
-   |        |
-   |        +-->Vida igual à zero?
-   |                   |
-   |        Sim-------------------Não         
-   |         |                     |
-   |     Game Over            Volta Início
-   |
-   +--> Encontrou Menina?
+    INÍCIO
+       |
+       V
+     Tela Inicial
+       |
+     Enter
+       |
+       V
+    Manual
+       |
+    Enter
+       |
+       V
+    Desenha Cenário
+       |
+       V
+    Loop Principal
+       |
+       +--> Ler Tecla
+       |
+       +--> Subir?
+       |
+       +--> Descer?
+       |
+       +--> Mover Gato
+       |
+       +--> Colidiu?
+       |        |
+       |       Sim
+       |        |
+       |    Perde Vida
+       |        |
+       |        +-->Vida igual à zero?
+       |                   |
+       |        Sim-------------------Não         
+       |         |                     |
+       |     Game Over            Volta Início
+       |
+       +--> Encontrou Menina?
             |
            Sim
             +-->Vida maior ou igual à 4?
