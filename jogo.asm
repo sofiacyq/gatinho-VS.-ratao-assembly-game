@@ -2,44 +2,74 @@ jmp main
 
 posMenina: var #1
 
-posGato: var #3
-    static posGato + #0, #840   ; Gato 0 começa na coluna 0 (Amarelo manteiga)
-    static posGato + #1, #850   ; Gato 1 começa na coluna 10 (Amarelo)
-    static posGato + #2, #860   ; Gato 2 começa na coluna 20 (Vermelho)
+Gatos: var #1
+    static Gatos, #0
 
-corGato: var #3
+fase: var #1
+    static fase, #1
+
+posGato: var #1
+    static posGato, #840   ; Gato 0 começa na coluna 0 (Amarelo manteiga)
+
+corGato: var #1
     static corGato + #0, #512   ; Amarelo manteiga
-    static corGato + #1, #768   ; Amarelo
-    static corGato + #2, #7936  ; Vermelho
 
 contadorGatos: var #1
     static contadorGatos, #0
 
-contadorTempo: var #1
-    static contadorTempo, #0
-
-flagGatoProximo: var #1
-    static flagGatoProximo, #0
-
-
+vidasGato: var#1
+    static vidasGato, #7
+ 
     
 main:
+    call Delay
+    call Delay
+
 	loadn r1, #tela1Linha0	    ;Endereco onde comeca a primeira linha do cenario
 	loadn r2, #0  	   ;cor branca
 	call ImprimeTela
-	
+
 	Loopmenu:
-		inchar r4
-		loadn r1, #13           ;tecla enter
+        inchar r4                   ; Fica esperando uma tecla ser pressionada
+    
+        loadn r5, #255              ; Máscara 0x00FF (pega apenas os 8 bits do ASCII)
+        and r4, r4, r5              ; r4 = r4 AND 255
+    
+        loadn r1, #13               ; Código ASCII da tecla Enter
+        cmp r4, r1
+        jne Loopmenu
+    
+    Manual:
+        call Delay
+        call Delay
+        
+        call ApagaTela
 
-		cmp r4, r1
-		jne Loopmenu
+        loadn r1, #telaManualLinha0	    ;Endereco onde comeca a primeira linha do cenario
+	    loadn r2, #0  	   ;cor branca
+	    call ImprimeTela2
 
-		loadn r5, #40           ;limita o valor para ficar entre 0 e 39
-		mod r3, r2, r5
+        loadn r1, #telaManual2Linha0
+        loadn r2, #0
+        call ImprimeTela2
+        
+        LoopManual:
+            inchar r4
+
+            loadn r5, #255              ; Máscara 0x00FF (pega apenas os 8 bits do ASCII)
+            and r4, r4, r5              ; r4 = r4 AND 255
+    
+            loadn r1, #13               ; Código ASCII da tecla Enter
+            cmp r4, r1
+            jne LoopManual
 		
 		
 	Restart:
+        loadn r3, #840
+        store posGato, r3
+        loadn r4, #7
+        store vidasGato, r4 
+        
         call ApagaTela
         loadn R1, #tela2Linha0	    ;Endereco onde comeca a primeira linha do cenario!!
         loadn R2, #58112  			;cor verde -> grama
@@ -53,19 +83,24 @@ main:
         store posMenina, r0         ;Personagem começa na linha 27, coluna 39
         call DesenhaMenina
 
-		LoopGatos:
-    	; Loop para atualizar os 3 gatos (0, 1 e 2)
-    	loadn r0, #0        ; r0 será o nosso índice do gato atual (começa no Gato 0)
-    
-		LoopAtualizaGatos:
-    	call MoveGatoId     ; Move o gato que está no índice r0
-    	inc r0              ; Avança para o próximo gato
-    	loadn r1, #3        ; Limite de gatos
-    	cmp r0, r1
-    	jne LoopAtualizaGatos
 
-    	call Delay          ; Controla a velocidade da animação
-    	jmp LoopGatos
+		LoopGatos:
+
+        inchar r7                    ;cria registrador 
+        
+        loadn r1, #'a'               ;r1 recebe tecla m, para subir
+        cmp r7,r1                    ;compara r1 com r7
+        jeq Sobe                     ;se igual vai pra SObe
+
+        loadn r1, #' '               ;r1 recebe tecla space
+        cmp r7, r1                   ;compara r1 com r7
+        jeq Desce                    ;se igual vai pra Desce
+
+        ContinuaLoop:
+        call MoveGato
+        call DesenhaMenina
+        call Delay
+        jmp LoopGatos
 
 
         loadn r0, #0	
@@ -74,31 +109,197 @@ main:
 halt
 
 ;--------------------------------------------
+    ;          SOBE
+;-------------------------------------------
+
+Sobe:
+    load r2, posGato      ; carrega a posição atual do gato
+    
+    loadn r3,  #840
+    sub r3, r2, r3
+
+    ;busca o caractere
+    loadn r6, #tela2Linha21
+    add r6, r6, r3
+    loadi r6, r6
+    
+    loadn r3, #58112
+    add r6, r6, r3
+    outchar r6, r2
+         ; apaga gato da posicao
+    loadn r3, #40
+    sub r2, r2, r3        ; sobe uma linha (posição - 40)
+    store posGato, r2     ; salva a nova posição
+    jmp ContinuaLoop
+
+;-------------------------------------------
+;                    DESCE
+;-------------------------------------------
+Desce:
+    load r2, posGato      ; carrega a posição atual do gato
+    loadn r3, #' '
+    outchar r3, r2        ; apaga gato da posicao
+    loadn r3, #40
+    add r2, r2, r3        ; desce uma linha (posição + 40)
+    store posGato, r2     ; salva a nova posição
+    jmp ContinuaLoop
+;----------------------------------------------
+;                   COLETOU GATO
+;----------------------------------------------
+ColetouGato:
+
+    load r5, contadorGatos
+    inc r5
+    store contadorGatos, r5
+
+    ;volta gato pro inicio
+    loadn r2, #840
+    storei r1, r2
+
+    jmp SalvaNovaPos
+
+;--------------------------------------------
 ;            Desenha e Apaga Menina
 ;--------------------------------------------
 DesenhaMenina:
-    push r0
     push r1
     push r2
 
-    load r0, posMenina
-    loadn r2, #3328             ;cor rosa
-    loadn r1, #':'               
-    add r1, r1, r2             
+    loadn r1, #telaMeninaLinha0	    ;Endereco onde comeca a primeira linha do cenario!!
+    loadn r2, #3328             ;cor marrom -> tronco da árvore        
+    call ImprimeTela2   	    ;Rotina de Impressão de Cenario na Tela Inteira
 
-    outchar r1, r0
     
     pop r2
     pop r1
-    pop r0
     rts
        
+;-------------------------------------------
+;                 SOME GATO
+;-------------------------------------------
+
+Morreu:
+    load r5, vidasGato
+    dec r5
+    store vidasGato, r5
+
+    load r2, posGato
+
+    loadn r3, #840
+    sub r3, r2, r3
+    loadn r6, #tela2Linha21
+    add r6, r6, r3
+    loadi r6, r6
+
+    loadn r3, #58112
+    add r6, r6, r3
+    outchar r6, r2
+    
+    loadn r2, #840
+    store posGato, r2
+    
+    loadn r6, #0
+    cmp r5, r6
+    jne SalvaNovaPos        ; ainda tem vidas, continua normalmente
+
+    ; sem vidas: limpa pilha antes de ir pro GameOver
+    pop r6
+    pop r5
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+    jmp GameOver
+
+;--------------------------------------------
+ ;               FASE DO RATO 
+ ; -----------------------------------------
+
+ FaseDoRato:
+
+    pop r6
+    pop r5
+    pop r4
+    pop r3
+    pop r2
+    pop r1
+
+    call Batalha
+    
+    call Delay
+    call Delay
+
+    Verifica:
+        ; Verifica a condição de vitória: vida maior ou igual a 4
+        load r5, vidasGato
+        loadn r6, #4
+        cmp r5, r6
+        jeg Ganhou
+        jne GameOverInsuficiente
+
+    Ganhou:
+        call ApagaTela
+        loadn r1, #telaGanhouLinha0
+        loadn r2, #0
+        call ImprimeTela
+
+        LoopGanhou:
+        call Delay
+        call Delay
+
+        inchar r4                   ; Fica esperando uma tecla ser pressionada
+    
+        loadn r5, #255              ; Máscara 0x00FF (pega apenas os 8 bits do ASCII)
+        and r4, r4, r5              ; r4 = r4 AND 255
+    
+        loadn r1, #13               ; Código ASCII da tecla Enter
+        cmp r4, r1
+        jne LoopGanhou
+        jeq main
+
+
+;--------------------------------------------
+;                 GAME OVER
+;--------------------------------------------
+GameOver:
+    Call ApagaTela
+
+    loadn r1, #telaGameOverLinha0
+    loadn r2, #0
+
+    call ImprimeTela
+
+    call Loopover
+
+GameOverInsuficiente:
+    Call ApagaTela
+
+    loadn r1, #telaGameOverInsuficienteLinha0
+    loadn r2, #0
+    call ImprimeTela
+
+    call Loopover
+
+Loopover:
+    call Delay
+    call Delay
+
+    inchar r4                   ; Fica esperando uma tecla ser pressionada
+    
+    loadn r5, #255              ; Máscara 0x00FF (pega apenas os 8 bits do ASCII)
+    and r4, r4, r5              ; r4 = r4 AND 255
+    
+    loadn r1, #13               ; Código ASCII da tecla Enter
+    cmp r4, r1
+    jne Loopover
+    jeq main
+
 ;--------------------------------------------
 ;                 Move Gato
 ;--------------------------------------------
 ; Parâmetro: r0 = Índice do gato (0, 1 ou 2)
 ;--------------------------------------------
-MoveGatoId:
+MoveGato:
     push r1
     push r2
     push r3
@@ -107,13 +308,25 @@ MoveGatoId:
     push r6
 
     ; 1. Calcular os endereços na memória baseados no ID (r0)
-    loadn r1, #posGato
-    add r1, r1, r0      ; r1 = endereço de posGato[ID]
+    loadn r1, #posGato    ; r1 = endereço de posGato[ID]
     loadi r2, r1        ; r2 = valor da posição atual do gato (ex: 845)
 
-    loadn r3, #corGato
-    add r3, r3, r0      ; r3 = endereço de corGato[ID]
-    loadi r4, r3        ; r4 = valor da cor do gato
+    ;apagar gato antigo
+     loadn r5, #840
+    sub r5, r2, r5
+
+    loadn r6, #tela2Linha21
+    add r6, r6, r5
+
+    loadi r5, r6
+
+    loadn r6, #58112
+    add r5, r5, r6
+
+    outchar r5, r2
+
+    loadn r4, #512
+
 
     ; r2 guarda a posição absoluta da tela (ex: 840 a 879)
     ; A linha 21 começa em 840. Queremos saber o deslocamento (coluna) dentro da linha:
@@ -130,6 +343,24 @@ MoveGatoId:
 
     ; 3. Calcular a nova posição do gato
     inc r2              ; Anda 1 bloco para a direita
+
+    ;colisao com o mato-----
+    loadn r5, #845
+        cmp r2, r5
+        jeq Morreu
+
+        loadn  r5, #851
+        cmp r2, r5
+        jeq Morreu
+
+        loadn r5, #860
+        cmp r2, r5
+        jeq Morreu
+
+
+    load r5, posMenina
+    cmp r2, r5
+    jeq Batalha
 
     ; 4. Verificar limite da linha 21 (Fim é 880)
     loadn r5, #880
@@ -160,9 +391,9 @@ SalvaNovaPos:
 Delay:
     push r0
     push r1
-    loadn r0, #30      ; Controle de velocidade dos 3 juntos
+    loadn r0, #200; Controle de velocidade dos 3 juntos
 Delay_Loop1:
-    loadn r1, #1000
+    loadn r1, #100
 Delay_Loop2:
     dec r1
     jnz Delay_Loop2
@@ -172,6 +403,67 @@ Delay_Loop2:
     pop r0
     rts
 
+
+;--------------------------------------------
+;                 BATALHA
+; --------------------------------------------
+Batalha:
+    push r1
+    push r2
+    push r4
+
+    call ApagaTela          ; limpa tudo primeiro
+    
+    loadn r1, #tela4Linha0
+    loadn r2, #58112
+    call ImprimeTela2       ; gato pequeno
+
+    call Delay
+    call Delay
+    call Delay
+    call Delay
+    call Delay
+    call Delay
+    call Delay
+
+    call Batalha2
+
+    Batalha2:
+        call ApagaTela
+
+        loadn r1, #tela5Linha0
+        loadn r2, #7936
+        call ImprimeTela2       ; rato por cima
+
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+        call Delay
+
+        Loop_batalha2:
+        inchar r4
+		loadn r1, #13           ;tecla enter
+
+		cmp r4, r1
+		jeq Verifica
+        jne Loop_batalha2
+
+pop r4
+pop r2
+pop r1
+
+        
+    
 
 ;--------------------------------------------
 ;             Imprime Tela
@@ -187,10 +479,10 @@ ImprimeTela:
 	push r4
 	push r5
 
-	loadn R0, #0  	; posicao inicial tem que ser o comeco da tela!
-	loadn R3, #40  	; Incremento da posicao da tela!
-	loadn R4, #41  	; incremento do ponteiro das linhas da tela
-	loadn R5, #1200 ; Limite da tela!
+	loadn r0, #0  	; posicao inicial tem que ser o comeco da tela!
+	loadn r3, #40  	; Incremento da posicao da tela!
+	loadn r4, #41  	; incremento do ponteiro das linhas da tela
+	loadn r5, #1200 ; Limite da tela!
 	
    ImprimeTela_Loop:
 		call ImprimeStr
@@ -346,57 +638,7 @@ ImprimeStr2:
 	pop r1
 	pop r0
 	rts
-
-;--------------------------------------------
-;     VerificaProximidade
-;     Só considera gato que está 1 posição à
-;     ESQUERDA da menina (vindo na direção dela)
-;--------------------------------------------
-VerificaProximidade:
-    push r0
-    push r1
-    push r2
-    push r3
-    push r4
-
-    load r1, posMenina      ;posição da menina
-    dec r1                   ;posição imediatamente à esquerda da menina
-
-    loadn r0, #0
-    loadn r4, #0
-    store flagGatoProximo, r4
-
-    LoopVerificaGato:
-        loadn r2, #posGato
-        add r2, r2, r0
-        loadi r3, r2          ;posição do gato r0
-
-        ;Verifica se o gato está exatamente na posição (posMenina - 1)
-        cmp r3, r1
-        ceq MarcaGatoProximo
-
-        jmp ProximoGatoVerif
-
-        MarcaGatoProximo:
-            loadn r4, #1
-            store flagGatoProximo, r4
-            loadn r4, #gatoProximoId
-            storei r4, r0
-
-        ProximoGatoVerif:
-            inc r0
-            loadn r4, #3
-            cmp r0, r4
-            jne LoopVerificaGato
-
-    pop r4
-    pop r3
-    pop r2
-    pop r1
-    pop r0
-    rts
-
-
+	
 	
 
 ;--------------------------------------------
@@ -434,6 +676,7 @@ tela0Linha27 : string "                                        "
 tela0Linha28 : string "                                        "
 tela0Linha29 : string "                                        "	
 
+
 ;Tela 01: gatinho vs. ratão
 tela1Linha0  : string "                                        "
 tela1Linha1  : string "                                        "
@@ -465,6 +708,7 @@ tela1Linha26 : string "                                        "
 tela1Linha27 : string "       Aperte enter para iniciar        "
 tela1Linha28 : string "                                        "
 tela1Linha29 : string "----------------------------------------"
+
 
 ;Tela 02: chão
 tela2Linha0  : string "                                        "
@@ -529,23 +773,22 @@ tela3Linha25 : string "                                        "
 tela3Linha26 : string "                                        "
 tela3Linha27 : string "                                        "
 tela3Linha28 : string "                                        "
-tela3Linha29 : string "                                        "
-
+tela3Linha29 : string "                                        "        
 
 ;Tela 04: Batalha1 
 tela4Linha0  : string "                                        "
 tela4Linha1  : string "                                        "
-tela4Linha2  : string "                                        "
+tela4Linha2  : string "                CUIDADO!                "
 tela4Linha3  : string "                                        "
 tela4Linha4  : string "                                        "
 tela4Linha5  : string "                                        "
 tela4Linha6  : string "                                        "
 tela4Linha7  : string "                                        "
 tela4Linha8  : string "                                        "
-tela4Linha9  : string "           _._     _,-'""`-.            "
-tela4Linha10 : string "         (,-.`._,'(       |\`-/|        "
-tela4Linha11 : string "             `-.-' \ )-`( , o o)        "
-tela4Linha12 : string "                   `-    \`_`"'-        "
+tela4Linha9  : string "           .     _,-''''`-.             "
+tela4Linha10 : string "         (,-.._,'(       ]K-X]          "
+tela4Linha11 : string "             -.-' I )-( , o o)          "
+tela4Linha12 : string "                   -    L_`'''-         "
 tela4Linha13 : string "                                        "
 tela4Linha14 : string "                                        "
 tela4Linha15 : string "                                        "
@@ -567,8 +810,8 @@ tela4Linha29 : string "                                        "
 
 ;Tela 05: Batalha2 
 tela5Linha0  : string "                                        "
-tela5Linha1  : string "                                        "
-tela5Linha2  : string "                                        "
+tela5Linha1  : string "    O RATAO APARECEU! CONTABILIZANDO    "
+tela5Linha2  : string "                 VIDAS                  "
 tela5Linha3  : string "                                        "
 tela5Linha4  : string "                                        "
 tela5Linha5  : string "                                        "
@@ -576,45 +819,108 @@ tela5Linha6  : string "                                        "
 tela5Linha7  : string "                                        "
 tela5Linha8  : string "                                        "
 tela5Linha9  : string "                                        "
-tela5Linha10 : string "         ( ) ____( )                    "
-tela5Linha11 : string "         /        /                     "
-tela5Linha12 : string "       / @    @  /                      "
-tela5Linha13 : string "      \ *       /                       "
-tela5Linha14 : string "      | VWVw v   \                      "
-tela5Linha15 : string "       \^^^ ^      \             )      "
-tela5Linha16 : string "    \  |    \        \            )     "
-tela5Linha17 : string "     \ |     \         \         /      "
-tela5Linha18 : string "       |                 \     /        "
-tela5Linha19 : string "       |                   \ /          "
-tela5Linha20 : string "           VV          VV               "
+tela5Linha10 : string "         ( ) __( )                      "
+tela5Linha11 : string "         K        K                     "
+tela5Linha12 : string "       K @    @  K                      "
+tela5Linha13 : string "      K *       K                       "
+tela5Linha14 : string "      K VWVw v   K                      "
+tela5Linha15 : string "       K^^^ ^      K             )      "
+tela5Linha16 : string "    7  K    7        K            )     "
+tela5Linha17 : string "     K K     K         K         K      "
+tela5Linha18 : string "       K                 K     K        "
+tela5Linha19 : string "       K                   K K          "
+tela5Linha20 : string "         k  VV        VV                "
 tela5Linha21 : string "                                        "
 tela5Linha22 : string "                                        "
 tela5Linha23 : string "                                        "
-tela5Linha24 : string "                                        "
+tela5Linha24 : string "     <APERTE ENTER PARA CONTINUAR>      "
 tela5Linha25 : string "                                        "
 tela5Linha26 : string "                                        "
 tela5Linha27 : string "                                        "
 tela5Linha28 : string "                                        "
 tela5Linha29 : string "                                        "
 
+;tela de vitoria (ganhou)
+telaGanhouLinha0  : string "                                        "
+telaGanhouLinha1  : string "                                        "
+telaGanhouLinha2  : string "                                        "
+telaGanhouLinha3  : string "                                        "
+telaGanhouLinha4  : string "                                        "
+telaGanhouLinha5  : string "  _____ _____ _____ _____               "
+telaGanhouLinha6  : string " |  |  |     |     |  __|               "
+telaGanhouLinha7  : string " |  |  |  |  |   --|  __|               "
+telaGanhouLinha8  : string "  `___`|_____|_____|_____|              "
+telaGanhouLinha9  : string "                                        "
+telaGanhouLinha10 : string "                                        "
+telaGanhouLinha11 : string "  _____ _____ _____ _____ _____ _____   "
+telaGanhouLinha12 : string " |   __|  _  |   | |  |  |     |  |  |  "
+telaGanhouLinha13 : string " |  |  |     | | | |     |  |  |  |  |  "
+telaGanhouLinha14 : string " |_____|__|__|_|___|__|__|_____|_____|  "
+telaGanhouLinha15 : string "                                        "
+telaGanhouLinha16 : string "                                        "
+telaGanhouLinha17 : string "                                        "
+telaGanhouLinha18 : string "                                        "
+telaGanhouLinha19 : string "                                        "
+telaGanhouLinha20 : string "                                        "
+telaGanhouLinha21 : string "                                        "
+telaGanhouLinha22 : string "  <APERTE ENTER PARA JOGAR NOVAMENTE>   "
+telaGanhouLinha23 : string "                                        "
+telaGanhouLinha24 : string "                                        "
+telaGanhouLinha25 : string "                                        "
+telaGanhouLinha26 : string "                                        "
+telaGanhouLinha27 : string "                                        "
+telaGanhouLinha28 : string "                                        "
+telaGanhouLinha29 : string "                                        "
+
+;Tela menina
+telaMeninaLinha0  : string "                                        "
+telaMeninaLinha1  : string "                                        "
+telaMeninaLinha2  : string "                                        "
+telaMeninaLinha3  : string "                                        "
+telaMeninaLinha4  : string "                                        "
+telaMeninaLinha5  : string "                                        "
+telaMeninaLinha6  : string "                                        "
+telaMeninaLinha7  : string "                                        "
+telaMeninaLinha8  : string "                                        "
+telaMeninaLinha9  : string "                                        "
+telaMeninaLinha10 : string "                                        "
+telaMeninaLinha11 : string "                                        "
+telaMeninaLinha12 : string "                                        "
+telaMeninaLinha13 : string "                                        "
+telaMeninaLinha14 : string "                                        "
+telaMeninaLinha15 : string "                                        "
+telaMeninaLinha16 : string "                                        "
+telaMeninaLinha17 : string "                                        "
+telaMeninaLinha18 : string "                                        "
+telaMeninaLinha19 : string "                                        "
+telaMeninaLinha20 : string "                                  o     "
+telaMeninaLinha21 : string "                                  :     "
+telaMeninaLinha22 : string "                                  ]     "
+telaMeninaLinha23 : string "                                        "
+telaMeninaLinha24 : string "                                        "
+telaMeninaLinha25 : string "                                        "
+telaMeninaLinha26 : string "                                        "
+telaMeninaLinha27 : string "                                        "
+telaMeninaLinha28 : string "                                        "
+telaMeninaLinha29 : string "                                        "
 
 telaManualLinha0  : string "            MANUAL DO JOGO              "
 telaManualLinha1  : string "                                        "
 telaManualLinha2  : string "                                        "
-telaManualLinha3  : string " OBJETIVO-> AJUDE O GATINHO A ENCONTRAR  "
+telaManualLinha3  : string " OBJETIVO-> AJUDE O GATINHO A ENCONTRAR "
 telaManualLinha4  : string " A MENINA NO FIM DO PERCURSO.           "
 telaManualLinha5  : string "                                        "
-telaManualLinha6  : string " CONTROLES->                             "
-telaManualLinha7  : string "   -TECLA 'm': SUBIR UMA LINHA          "
-telaManualLinha8  : string "   -BARRA DE ESPACO: DESCER UMA LINHA   "
+telaManualLinha6  : string " CONTROLES->                            "
+telaManualLinha7  : string "   -TECLA 'a'- SUBIR UMA LINHA          "
+telaManualLinha8  : string "   -BARRA DE ESPACO- DESCER UMA LINHA   "
 telaManualLinha9  : string "                                        "
 telaManualLinha10 : string " REGRAS->                               "
-telaManualLinha11 : string "   -O GATINHO SE MOVE ALTOMATICAMENTE   "
-telaManualLinha12 : string " PARA A DIREIRA;                        "
+telaManualLinha11 : string "   -O GATINHO SE MOVE AUTOMATICAMENTE   "
+telaManualLinha12 : string " PARA A DIREItA;                        "
 telaManualLinha13 : string "                                        "
 telaManualLinha14 : string "   -EVITE OBSTACULOS PELO CAMINHO;      "
 telaManualLinha15 : string " -AO ENCOSTAR EM UM OBSTACULO, O GATO   "
-telaManualLinha16 : string "   -AO ALCANÇAR A MENINA, VOÇE VENCE;   "
+telaManualLinha16 : string "                                        "
 telaManualLinha17 : string "                                        "
 telaManualLinha18 : string " -SE TODAS AS VIDAS FOREM PERDIDAS      "
 telaManualLinha19 : string "  O JOGO TERMINA.                       "
@@ -640,22 +946,18 @@ telaManual2Linha6  : string "                                        "
 telaManual2Linha7  : string "                                        "
 telaManual2Linha8  : string "                                        "
 telaManual2Linha9  : string "                                        "
-telaManual2Linha10 : string "                                        "
-telaManual2Linha11 : string "                                        "
-telaManual2Linha12 : string "                                        "
-telaManual2Linha9  : string "                                        "
 telaManual2Linha10 : string " REGRAS->                               "
-telaManual2Linha11 : string "   -O GATINHO SE MOVE ALTOMATICAMENTE   "
-telaManual2Linha12 : string " PARA A DIREIRA;                        "
+telaManual2Linha11 : string "   -O GATINHO SE MOVE AUTOMATICAMENTE   "
+telaManual2Linha12 : string " PARA A DIREITA;                        "
 telaManual2Linha13 : string "                                        "
 telaManual2Linha14 : string "   -EVITE OBSTACULOS PELO CAMINHO;      "
 telaManual2Linha15 : string " -AO ENCOSTAR EM UM OBSTACULO, O GATO   "
-telaManual2Linha16 : string "   -AO ALCANCAR A MENINA, VOCE VENCE;   "
-telaManual2Linha17 : string "                                        "
+telaManual2Linha16 : string "  PERDE UMA VIDA                        "
+telaManual2Linha17 : string " -AO ALCANCAR A MENINA, VOCE VENCE;     "
 telaManual2Linha18 : string " -SE TODAS AS VIDAS FOREM PERDIDAS      "
 telaManual2Linha19 : string "  O JOGO TERMINA.                       "
 telaManual2Linha20 : string "                                        "
-telaManual2Linha21 : string "             BOA SORTE!                 "
+telaManual2Linha21 : string "                                        "
 telaManual2Linha22 : string "                                        "
 telaManual2Linha23 : string "                                        "
 telaManual2Linha24 : string "                                        "
@@ -665,3 +967,67 @@ telaManual2Linha27 : string "                                        "
 telaManual2Linha28 : string "                                        "
 telaManual2Linha29 : string "----------------------------------------"
 
+;tela game over
+telaGameOverLinha0  : string "                                        "
+telaGameOverLinha1  : string "                                        "
+telaGameOverLinha2  : string "                                        "
+telaGameOverLinha3  : string "                                        "
+telaGameOverLinha4  : string "                                        "
+telaGameOverLinha5  : string "  _______  _______  __   __  _______    "
+telaGameOverLinha6  : string " |       ||   _   ||  |_|  ||       |   "
+telaGameOverLinha7  : string " |    ___||  |_|  ||       ||    ___|   "
+telaGameOverLinha8  : string " |   | __ |       ||       ||   |___    "
+telaGameOverLinha9  : string " |   ||  ||       ||       ||    ___|   "
+telaGameOverLinha10 : string " |   |_| ||   _   || ||_|| ||   |___    "
+telaGameOverLinha11 : string " |_______||__| |__||_|   |_||_______|   "
+telaGameOverLinha12 : string "  _______  __   __  _______  ______     "
+telaGameOverLinha13 : string " |       ||  | |  ||       ||     _ |   "
+telaGameOverLinha14 : string " |   _   ||  |_|  ||    ___||   | ||    "
+telaGameOverLinha15 : string " |  | |  ||       ||   |___ |   |_||_   "
+telaGameOverLinha16 : string " |  |_|  ||       ||    ___||    __  |  "
+telaGameOverLinha17 : string " |       | |     | |   |___ |   |  | |  "
+telaGameOverLinha18 : string " |_______|  |___|  |_______||___|  |_|  "
+telaGameOverLinha19 : string "                                        "
+telaGameOverLinha20 : string "         VOCE MATOU O GATINHO           "
+telaGameOverLinha21 : string "                                        "
+telaGameOverLinha22 : string "                                        "
+telaGameOverLinha23 : string "     <APERTE ENTER PARA RECOMECAR>      "
+telaGameOverLinha24 : string "                                        "
+telaGameOverLinha25 : string "                                        "
+telaGameOverLinha26 : string "                                        "
+telaGameOverLinha27 : string "                                        "
+telaGameOverLinha28 : string "                                        "
+telaGameOverLinha29 : string "                                        "
+
+
+;tela game over por gatinhos insuficientes
+telaGameOverInsuficienteLinha0  : string "                                        "
+telaGameOverInsuficienteLinha1  : string "                                        "
+telaGameOverInsuficienteLinha2  : string "                                        "
+telaGameOverInsuficienteLinha3  : string "                                        "
+telaGameOverInsuficienteLinha4  : string "                                        "
+telaGameOverInsuficienteLinha5  : string "  _______  _______  __   __  _______    "
+telaGameOverInsuficienteLinha6  : string " |       ||   _   ||  |_|  ||       |   "
+telaGameOverInsuficienteLinha7  : string " |    ___||  |_|  ||       ||    ___|   "
+telaGameOverInsuficienteLinha8  : string " |   | __ |       ||       ||   |___    "
+telaGameOverInsuficienteLinha9  : string " |   ||  ||       ||       ||    ___|   "
+telaGameOverInsuficienteLinha10 : string " |   |_| ||   _   || ||_|| ||   |___    "
+telaGameOverInsuficienteLinha11 : string " |_______||__| |__||_|   |_||_______|   "
+telaGameOverInsuficienteLinha12 : string "  _______  __   __  _______  ______     "
+telaGameOverInsuficienteLinha13 : string " |       ||  | |  ||       ||     _ |   "
+telaGameOverInsuficienteLinha14 : string " |   _   ||  |_|  ||    ___||   | ||    "
+telaGameOverInsuficienteLinha15 : string " |  | |  ||       ||   |___ |   |_||_   "
+telaGameOverInsuficienteLinha16 : string " |  |_|  ||       ||    ___||    __  |  "
+telaGameOverInsuficienteLinha17 : string " |       | |     | |   |___ |   |  | |  "
+telaGameOverInsuficienteLinha18 : string " |_______|  |___|  |_______||___|  |_|  "
+telaGameOverInsuficienteLinha19 : string "                                        "
+telaGameOverInsuficienteLinha20 : string "                                        "
+telaGameOverInsuficienteLinha21 : string "        VIDAS INSUFICIENTES             "
+telaGameOverInsuficienteLinha22 : string "                                        "
+telaGameOverInsuficienteLinha23 : string "                                        "
+telaGameOverInsuficienteLinha24 : string "                                        "
+telaGameOverInsuficienteLinha25 : string "     <APERTE ENTER PARA RECOMECAR>      "
+telaGameOverInsuficienteLinha26 : string "                                        "
+telaGameOverInsuficienteLinha27 : string "                                        "
+telaGameOverInsuficienteLinha28 : string "                                        "
+telaGameOverInsuficienteLinha29 : string "                                        "
